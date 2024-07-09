@@ -30,7 +30,7 @@ A RESTful API for managing employee information, built with .NET 6. This API all
 1. **Clone the repository**:
 
     ```sh
-    git clone https://github.com/yourusername/EmployeeManagementAPI.git
+    git clone https://github.com/ob971/EmployeeManagementAPI
     cd EmployeeManagementAPI
     ```
 
