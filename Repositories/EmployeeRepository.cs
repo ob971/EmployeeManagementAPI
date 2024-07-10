@@ -1,8 +1,9 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using EmployeeManagementAPI.Data;
+﻿using EmployeeManagementAPI.Data;
+using EmployeeManagementAPI.Interfaces;
 using EmployeeManagementAPI.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace EmployeeManagementAPI.Repositories
 {
@@ -15,29 +16,36 @@ namespace EmployeeManagementAPI.Repositories
             _context = context;
         }
 
-        public IEnumerable<Employee> GetEmployees() => _context.Employees.ToList();
+        public async Task<IEnumerable<Employee>> GetEmployeesAsync()
+        {
+            return await _context.Employees.ToListAsync();
+        }
 
-        public Employee? GetEmployeeById(int id) => _context.Employees.Find(id);
+        public async Task<Employee> GetEmployeeByIdAsync(int id)
+        {
+            return await _context.Employees.FindAsync(id);
+        }
 
-        public void AddEmployee(Employee employee)
+        public async Task<Employee> AddEmployeeAsync(Employee employee)
         {
             _context.Employees.Add(employee);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
+            return employee;
         }
 
-        public void UpdateEmployee(Employee employee)
+        public async Task UpdateEmployeeAsync(Employee employee)
         {
             _context.Entry(employee).State = EntityState.Modified;
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
 
-        public void DeleteEmployee(int id)
+        public async Task DeleteEmployeeAsync(int id)
         {
-            var employee = _context.Employees.Find(id);
+            var employee = await _context.Employees.FindAsync(id);
             if (employee != null)
             {
                 _context.Employees.Remove(employee);
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
             }
         }
     }

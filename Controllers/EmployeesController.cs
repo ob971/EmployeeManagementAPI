@@ -1,68 +1,79 @@
-﻿using System.Collections.Generic;
-using Microsoft.AspNetCore.Mvc;
+﻿using AutoMapper;
+using EmployeeManagementAPI.Dtos;
+using EmployeeManagementAPI.Interfaces;
 using EmployeeManagementAPI.Models;
-using EmployeeManagementAPI.Repositories;
+using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace EmployeeManagementAPI.Controllers
 {
-    [ApiController]
     [Route("api/[controller]")]
+    [ApiController]
     public class EmployeesController : ControllerBase
     {
-        private readonly IEmployeeRepository _employeeRepository;
+        private readonly IEmployeeRepository _repository;
+        private readonly IMapper _mapper;
 
-        public EmployeesController(IEmployeeRepository employeeRepository)
+        public EmployeesController(IEmployeeRepository repository, IMapper mapper)
         {
-            _employeeRepository = employeeRepository;
+            _repository = repository;
+            _mapper = mapper;
         }
 
-        // GET: api/employees
         [HttpGet]
-        public ActionResult<IEnumerable<Employee>> GetEmployees()
+        public async Task<ActionResult<IEnumerable<EmployeeDto>>> GetEmployees()
         {
-            var employees = _employeeRepository.GetEmployees();
-            return Ok(employees);
+            var employees = await _repository.GetEmployeesAsync();
+            var employeeDtos = _mapper.Map<IEnumerable<EmployeeDto>>(employees);
+            return Ok(employeeDtos);
         }
 
-        // GET: api/employees/{id}
         [HttpGet("{id}")]
-        public ActionResult<Employee> GetEmployee(int id)
+        public async Task<ActionResult<EmployeeDto>> GetEmployee(int id)
         {
-            var employee = _employeeRepository.GetEmployeeById(id);
+            var employee = await _repository.GetEmployeeByIdAsync(id);
             if (employee == null)
             {
                 return NotFound();
             }
-            return Ok(employee);
+            var employeeDto = _mapper.Map<EmployeeDto>(employee);
+            return Ok(employeeDto);
         }
 
-        // POST: api/employees
         [HttpPost]
-        public ActionResult<Employee> PostEmployee(Employee employee)
+        public async Task<ActionResult<EmployeeDto>> PostEmployee([FromBody] EmployeeDto employeeDto)
         {
-            _employeeRepository.AddEmployee(employee);
-            return CreatedAtAction(nameof(GetEmployee), new { id = employee.Id }, employee);
+            var employee = _mapper.Map<Employee>(employeeDto);
+            var createdEmployee = await _repository.AddEmployeeAsync(employee);
+            var createdEmployeeDto = _mapper.Map<EmployeeDto>(createdEmployee);
+            return CreatedAtAction(nameof(GetEmployee), new { id = createdEmployeeDto.Id }, createdEmployeeDto);
         }
 
-        // PUT: api/employees/{id}
         [HttpPut("{id}")]
-        public IActionResult PutEmployee(int id, Employee employee)
+        public async Task<IActionResult> PutEmployee(int id, [FromBody] EmployeeDto employeeDto)
         {
-            if (id != employee.Id)
+            if (id != employeeDto.Id)
             {
                 return BadRequest();
             }
 
-            _employeeRepository.UpdateEmployee(employee);
+            var employee = _mapper.Map<Employee>(employeeDto);
+            await _repository.UpdateEmployeeAsync(employee);
             return NoContent();
         }
 
-        // DELETE: api/employees/{id}
         [HttpDelete("{id}")]
-        public IActionResult DeleteEmployee(int id)
+        public async Task<IActionResult> DeleteEmployee(int id)
         {
-            _employeeRepository.DeleteEmployee(id);
+            await _repository.DeleteEmployeeAsync(id);
             return NoContent();
         }
+    }
+
+    public interface IMapper
+    {
+        T Map<T>(EmployeeDto employeeDto);
+        object Map<T>(Employee createdEmployee);
     }
 }

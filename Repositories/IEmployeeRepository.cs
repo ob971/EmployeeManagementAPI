@@ -1,18 +1,15 @@
 ﻿using EmployeeManagementAPI.Models;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
-namespace EmployeeManagementAPI.Repositories
+namespace EmployeeManagementAPI.Interfaces
 {
     public interface IEmployeeRepository
     {
-        IEnumerable<Employee> GetEmployees();
-
-        Employee? GetEmployeeById(int id);
-
-        void AddEmployee(Employee employee);
-
-        void UpdateEmployee(Employee employee);
-
-        void DeleteEmployee(int id);
+        Task<IEnumerable<Employee>> GetEmployeesAsync();
+        Task<Employee> GetEmployeeByIdAsync(int id);
+        Task<Employee> AddEmployeeAsync(Employee employee);
+        Task UpdateEmployeeAsync(Employee employee);
+        Task DeleteEmployeeAsync(int id);
     }
 }
